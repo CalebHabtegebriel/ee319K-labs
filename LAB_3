@@ -122,11 +122,25 @@ Start
 loop  
 ; main engine goes here
 
+
+Repeat_Process	
+			LDR R0, =GPIO_PORTE_DATA_R	;R0 = Port E data address
+			LDR R1, [R0]				;R1 = Port E data
+			LSR R1, #1					;Put button data into LSB
+			AND R1, R1, #1				;Check to see if pressed (1=on, 0=off)
+			BNE Counter					;If 1, check counter subroutine, if not, check second button below
+			
+			LDR R0, =GPIO_PORTF_DATA_R	;R0 = Port F address
+			LDR R1, [R0]				;R1 = Port F data
+			LSR R1, #4					;Put button data into LSB
+			AND R1, R1, #1				;Check to see if pressed (1=on, 0=off)
+			BNE Repeat_Process			;If not on, loop
+			B Breath					;If on, go to breath subroutine
+
+Counter		ADD R1, 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;SUBROUTINES HERE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; LD Delay variable(in cycles) = (duty-cycle in milliseconds)/[(4 bus cycles)*(12.5 nanoseconds per bus cycle)]
-
-
-
-
 
 duty30
 			
