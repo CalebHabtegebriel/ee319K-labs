@@ -47,6 +47,8 @@ DutyCycle_30 EQU 0x002DC6C0			;3 million bus cycles (150 milliseconds)
 DutyCycle_70 EQU 0x006ACFC0			;7 million bus cycles (350 milliseconds)
 DutyCycle_10 EQU 0x000F4240			;1 million bus cycles (50 milliseconds)
 DutyCycle_90 EQU 0x00895440			;9 million bus cycles (450 milliseconds)
+	
+Counter EQU 0x00000000				;Declare counter variable
 
        IMPORT  TExaS_Init
        THUMB
@@ -123,20 +125,135 @@ loop
 ; LD Delay variable(in cycles) = (duty-cycle in milliseconds)/[(4 bus cycles)*(12.5 nanoseconds per bus cycle)]
 
 
-			LDR R0, =DutyCycle_50		;R0 = # bus cycles for 0.5 seconds
-dutytest50	SUBS R0, R0, #0x01			;Subtract 1
-			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E Data
-			EOR R1, #0x04				;Toggle PE2
-			BNE duty50				;If not 0, repeat
+
+
+
+duty30
+			
+			LDR R0, =DutyCycle_30		;R0 = # bus cycles for 0.15 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Loop30_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop30_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_70		;R0 = # bus cycles for 0.35 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Loop30_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop30_OFF				;If not 0, repeat
+			
+			LDR R0, =GPIO_PORTF_DATA_R	;R0 = Port F data address
+			LDR R1, [R0]				;R1 = Port F data
+			LSR R1, #1					;Put input into LSB
+			ADD R1, R1, #-1				;Check to see if Breath button is on
+			BNE duty30					;If not on, loop
+			B	Breath					;If on, jump to that subroutine
+
+duty50
+			
+			LDR R0, =DutyCycle_50		;R0 = # bus cycles for 0.25 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Loop50_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop50_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_50		;R0 = # bus cycles for 0.25 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Loop50_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop50_OFF				;If not 0, repeat
+			
+			LDR R0, =GPIO_PORTF_DATA_R	;R0 = Port F data address
+			LDR R1, [R0]				;R1 = Port F data
+			LSR R1, #1					;Put input into LSB
+			ADD R1, R1, #-1				;Check to see if Breath button is on
+			BNE duty50					;If not on, loop
+			B	Breath					;If on, jump to that subroutine
+			
+duty70
+			
+			LDR R0, =DutyCycle_70		;R0 = # bus cycles for 0.35 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Loop70_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop70_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_30		;R0 = # bus cycles for 0.15 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Loop70_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop70_OFF				;If not 0, repeat
+			
+			LDR R0, =GPIO_PORTF_DATA_R	;R0 = Port F data address
+			LDR R1, [R0]				;R1 = Port F data
+			LSR R1, #1					;Put input into LSB
+			ADD R1, R1, #-1				;Check to see if Breath button is on
+			BNE duty70					;If not on, loop
+			B	Breath					;If on, jump to that subroutine
+
+duty90
+			
+			LDR R0, =DutyCycle_90		;R0 = # bus cycles for 0.15 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Loop90_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop90_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_10		;R0 = # bus cycles for 0.35 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Loop90_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop90_OFF				;If not 0, repeat
+			
+			LDR R0, =GPIO_PORTF_DATA_R	;R0 = Port F data address
+			LDR R1, [R0]				;R1 = Port F data
+			LSR R1, #1					;Put input into LSB
+			ADD R1, R1, #-1				;Check to see if Breath button is on
+			BNE duty90					;If not on, loop
+			B	Breath					;If on, jump to that subroutine
+
+duty10
+			
+			LDR R0, =DutyCycle_10		;R0 = # bus cycles for 0.05 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Loop10_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop10_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_90		;R0 = # bus cycles for 0.45 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Loop10_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop10_OFF				;If not 0, repeat
+			
+			LDR R0, =GPIO_PORTF_DATA_R	;R0 = Port F data address
+			LDR R1, [R0]				;R1 = Port F data
+			LSR R1, #1					;Put input into LSB
+			ADD R1, R1, #-1				;Check to see if Breath button is on
+			BNE duty10					;If not on, loop
+			B	Breath					;If on, jump to that subroutine
 	
-	
-;	LDR R0, =COUNT;
-;	LDR R1, [R0];
-;	AND R1, #0; 
-;	STR R1, R0;
-	
-	
-   
+BREATH
      B    loop
 
       
