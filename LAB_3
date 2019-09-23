@@ -122,7 +122,8 @@ Start
 loop  
 ; main engine goes here
 
-
+			
+			LDR R4, =COUNTER ;Loading counter value on R4 (keep using R4 as counter)
 Repeat_Process	
 			LDR R0, =GPIO_PORTE_DATA_R	;R0 = Port E data address
 			LDR R1, [R0]				;R1 = Port E data
@@ -137,8 +138,29 @@ Repeat_Process
 			BNE Repeat_Process			;If not on, loop
 			B Breath					;If on, go to breath subroutine
 
-Counter		ADD R1, 
+Counter		CMP R4, #0;  checking if counter has been used (if it's first time then it would be 0)
+			BEQ duty30; it it's first time go to duty 30
+			ADD R2, R4, #-5; checking if it is 5
+			BNE DECREMENT
+			B RESET COUNTER
+			
+RESET COUNTER AND R4, R4, #0; resetting if it is 5
+			  ADD R4, R4, #1;
+			  B DECREMENT
 
+DECREMENT 	SUBS R4, R4, #1; subtracting 1 and checking if it is 1
+			CMP	R4, #0 
+			BEQ duty30
+			SUBS R4, R4, #1; subtracting 1 and checking if it is 2
+			CMP R4, #0;
+			BEQ duty50
+			SUBS R4, R4, #1; subtracting 1 and checking if it is 3
+			CMP R4, #0;
+			BEQ duty70
+			SUBS R4, R4, #1; subtracting 1 and checking if it is 4
+			CMP R4, #0;
+			BEQ duty90;
+			BEQ duty10; if not 4 then its 5 so go to duty 10
 ;;;;;;;;;;;;;;;;;;;;;;;;;;SUBROUTINES HERE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; LD Delay variable(in cycles) = (duty-cycle in milliseconds)/[(4 bus cycles)*(12.5 nanoseconds per bus cycle)]
 
