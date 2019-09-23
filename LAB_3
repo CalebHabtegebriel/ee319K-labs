@@ -88,7 +88,7 @@ Start
 	LDRB R1, [R0]				;R1 = direction data
 	ORR R1, 0X10				;Pin 4 is output
 	AND R1, 0XEF;				;Pins 0-3 & 5-7 are inputs
-	STRB R1, [R0];				;store back into mem
+	STRB R1, [R0]				;store back into mem
 	
 	LDR R0, =GPIO_PORTE_AFSEL_R;
 	LDRB R1, [R0];
@@ -119,12 +119,12 @@ loop
 
 ; LD Delay variable(in cycles) = (duty-cycle in milliseconds)/[(4 bus cycles)*(12.5 nanoseconds per bus cycle)]
 
-duty50
-	LDR R0, =DutyCycle_50		;R0 = # bus cycles for 0.5 seconds
-	SUBS R0, R0, #0x01			;Subtract 1
-	LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E Data
-	EOR R1, #0x04				;Toggle PE2
-	BNE duty50				;If not 0, repeat
+
+			LDR R0, =DutyCycle_50		;R0 = # bus cycles for 0.5 seconds
+dutytest50	SUBS R0, R0, #0x01			;Subtract 1
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E Data
+			EOR R1, #0x04				;Toggle PE2
+			BNE duty50				;If not 0, repeat
 	
 	
 ;	LDR R0, =COUNT;
