@@ -42,6 +42,9 @@ GPIO_PORTF_CR_R    EQU 0x40025524
 GPIO_LOCK_KEY      EQU 0x4C4F434B  ; Unlocks the GPIO_CR register
 SYSCTL_RCGCGPIO_R  EQU 0x400FE608
 
+DutyCycle_50 EQU 0x004C4B40			;5 million bus cycles (250 milliseconds)
+DutyCycle_30 EQU 0x002DC6C0			;3 million bus cycles (150 milliseconds)
+
        IMPORT  TExaS_Init
        THUMB
        AREA    DATA, ALIGN=2
@@ -54,23 +57,39 @@ SYSCTL_RCGCGPIO_R  EQU 0x400FE608
 Start
  ; TExaS_Init sets bus clock at 80 MHz
      BL  TExaS_Init ; voltmeter, scope on PD3
+	 
  ; Initialization goes here
-	LDR R0, =SYSCTL_RCGCGPIO_R; TURNING ON CLOCK
-	LDRB R1, [R0];
-	ORR R1, #0X30;
-	STRB R1, [R0];
+	LDR R0, =SYSCTL_RCGCGPIO_R	;R0 = clock address 
+	LDRB R1, [R0]				;R1 = clock data
+	ORR R1, #0x10				;Turn on Port E clock
+	STRB R1, [R0];				;Store back into mem
+	NOP							;Time Delay
 	NOP
-	NOP
-	LDR	R0, =GPIO_PORTE_DIR_R; PORT E DIRECTION REGISTER
-	LDRB R1, [R0];
-	ORR R1, #0X04;
-	AND R1, #0XFC
-	STRB R1, R0;
-	LDR R0, =GPIO_PORTF_DIR_R; PORT F DIRECTION REGISTER
-	LDRB R1, [R0];
-	ORR R1, 0X10;
-	AND R1, 0XEF;
-	STRB R1, [R0];
+	
+	LDR R0, =GPIO_PORTF_LOCK_R	;R0 = Lock location
+	LDR R1, =GPIO_LOCK_KEY		;R1 = Key
+	STRB R1, [R0]				;Unlock dis boi	
+	
+	LDR R0, =GPIO_PORTE_DEN_R	;R0 = Port E pin enable address
+	LDRB R1, [R0]				;R1 = pin enable data
+	ORR R1, 0X03				;Enable pins 0 and 1
+	STR R1, [R0]
+	LDR R0, =GPIO_PORTF_DEN_R	;R0 = Port F pin enable address	
+	LDRB R1, [R0]				;R1 = pin enable data
+	ORR R1, 0X10				;Enable pin 4
+	STR R1, [R0]
+	
+	LDR	R0, =GPIO_PORTE_DIR_R	;R0 = Port E direction address
+	LDRB R1, [R0]				;R1 = direction data
+	ORR R1, #0X04				;Pin 2 is output
+	AND R1, #0XFB				;Pins 0&1&3-7 are inputs	DOUBLE CHECK THIS (overlap with ORR and AND)
+	STRB R1, R0;				;Store into mem
+	LDR R0, =GPIO_PORTF_DIR_R	;R0 = Port F direction address
+	LDRB R1, [R0]				;R1 = direction data
+	ORR R1, 0X10				;Pin 4 is output
+	AND R1, 0XEF;				;Pins 0-3 & 5-7 are inputs
+	STRB R1, [R0];				;store back into mem
+	
 	LDR R0, =GPIO_PORTE_AFSEL_R;
 	LDRB R1, [R0];
 	ORR R1, 0X01;
@@ -79,15 +98,8 @@ Start
 	LDRB R1, [R0];
 	ORR R1, 0X01;
 	STRB R1, [R0];
-	LDR R0, =GPIO_PORTE_DEN_R;
-	LDRB R1, [R0];
-	ORR R1, 0X03;
-	LDR R0, =GPIO_PORTF_DEN_R;
-	LDRB R1, [R0];
-	ORR R1, 0X10;
-	LDR R0, =GPIO_PORTF_LOCK_R;
-	LDR R1, =GPIO_LOCK_KEY;
-	STRB R1, [R0];
+
+
 	LDR R0, =GPIO_PORTF_CR_R;
 	LDRB R1, [R0];
 	ORR R1, 0X10;
@@ -105,10 +117,20 @@ Start
 loop  
 ; main engine goes here
 
-	LDR R0, =COUNT;
-	LDR R1, [R0];
-	AND R1, #0; 
-	STR R1, R0;
+; LD Delay variable(in cycles) = (duty-cycle in milliseconds)/[(4 bus cycles)*(12.5 nanoseconds per bus cycle)]
+
+duty50
+	LDR R0, =DutyCycle_50		;R0 = # bus cycles for 0.5 seconds
+	SUBS R0, R0, #0x01			;Subtract 1
+	LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E Data
+	EOR R1, #0x04				;Toggle PE2
+	BNE duty50				;If not 0, repeat
+	
+	
+;	LDR R0, =COUNT;
+;	LDR R1, [R0];
+;	AND R1, #0; 
+;	STR R1, R0;
 	
 	
    
