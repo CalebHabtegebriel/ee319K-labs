@@ -44,6 +44,9 @@ SYSCTL_RCGCGPIO_R  EQU 0x400FE608
 
 DutyCycle_50 EQU 0x004C4B40			;5 million bus cycles (250 milliseconds)
 DutyCycle_30 EQU 0x002DC6C0			;3 million bus cycles (150 milliseconds)
+DutyCycle_70 EQU 0x006ACFC0			;7 million bus cycles (350 milliseconds)
+DutyCycle_10 EQU 0x000F4240			;1 million bus cycles (50 milliseconds)
+DutyCycle_90 EQU 0x00895440			;9 million bus cycles (450 milliseconds)
 
        IMPORT  TExaS_Init
        THUMB
