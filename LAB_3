@@ -186,6 +186,7 @@ loop
 
 			
 			LDR R4, =Counter_Variable 			;Loading counter value on R4 (R4 strictly for counter)
+			B duty30
 Repeat_Process	
 			LDR R0, =GPIO_PORTE_DATA_R	;R0 = Port E data address
 			LDR R1, [R0]				;R1 = Port E data
@@ -586,9 +587,10 @@ Breath_OFF	SUBS R6, R6, #0x01			;Subtract 1
 			LDR R1, [R0]				;R1 = Port F data
 			LSR R1, #4					;Put input into LSB
 			AND R1, #1					;Clear all bits except for input which is in LSB
-			ADD R1, #-1					;Check to see if Breath button is on
-			BNE	Breath2
-			B 
+			CMP R1, #1
+			;ADD R1, #-1					;Check to see if Breath button is on
+			BEQ	Check_Counter
+			B 	Breath2
 
 Exhale		LDR R5, =DutyCycle_max		;R0 = # bus cycles for 0.15 seconds
 			LDR R3, =DutyCycleb;
@@ -599,14 +601,14 @@ Breath3		LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
 			SUBS R5, #0X07D0;
 			MOV R0, R5
 			CMP R0, R3;
-			BEQ Breath2
+			BEQ Breath
 			
 			
 Breath2_ON	SUBS R0, R0, #0x01			;Subtract 1
 			BNE Breath2_ON				;If not 0, repeat
 
-			LDR R3, =DutyCycleb		;R0 = # bus cycles for 0.35 seconds
-			SUBS R6, R5, R3
+			LDR R3, =DutyCycle_max	;R0 = # bus cycles for 0.35 seconds
+			SUBS R6, R3, R5
 			AND R2, #0x02				;Turn PE2 off
 			STR R2, [R1]				;Store into mem
 						
@@ -618,9 +620,10 @@ Breath2_OFF	SUBS R6, R6, #0x01			;Subtract 1
 			LDR R1, [R0]				;R1 = Port F data
 			LSR R1, #4					;Put input into LSB
 			AND R1, #1					;Clear all bits except for input which is in LSB
-			ADD R1, #-1					;Check to see if Breath button is on
-			BNE	Breath3
-			B Check_Counter
+			CMP R1, #1
+			;ADD R1, #-1					;Check to see if Breath button is on
+			BEQ	Check_Counter
+			B Breath3
 
 
      ALIGN      ; make sure the end of this section is aligned
