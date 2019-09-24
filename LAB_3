@@ -385,7 +385,7 @@ Loop90_OFF	SUBS R0, R0, #0x01			;Subtract 1
 			BEQ duty10									;If still on, stay blinking
 			
 			;If off, exit this duty cycle
-			ADD R4, #1					;Increment counter
+			ADD R4, #1					;Increment counter											This  is added because from the  skip4 branch
 			B Repeat_Process
 			
 skip4		ADD R4, #1					;Add 1 to counter
