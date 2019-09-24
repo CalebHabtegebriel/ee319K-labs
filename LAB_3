@@ -1,4 +1,3 @@
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;SUBROUTINES HERE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; LD Delay variable(in cycles) = (duty-cycle in milliseconds)/[(4 bus cycles)*(12.5 nanoseconds per bus cycle)]
 
@@ -51,6 +50,12 @@ DutyCycle_30 EQU 0x002DC6C0			;3 million bus cycles (150 milliseconds)
 DutyCycle_70 EQU 0x006ACFC0			;7 million bus cycles (350 milliseconds)
 DutyCycle_10 EQU 0x000F4240			;1 million bus cycles (50 milliseconds)
 DutyCycle_90 EQU 0x00895440			;9 million bus cycles (450 milliseconds)
+DutyCycle_30b EQU 0x0000EA60        ;60 thousand bus cycles  (30 milliseconds)
+DutyCycle_50b EQU 0x000186A0        ;100 thousand bus cycles (50 milliseconds)
+DutyCycle_70b EQU 0x000222E0		;140 thousand bus cycles (70 milliseconds)
+DutyCycle_90b EQU 0x0002BF20		;180 thousand bus cycles (90 milliseconds)
+DutyCycle_10b EQU 0x00004E20		;20 thousand bus cycles (10 milliseconds)
+
 	
 Counter_Variable EQU 0x00000000				;Declare counter variable
 
@@ -360,7 +365,7 @@ skip5		ADD R4, R4, #1				;Add 1 to counter
 			B	Breath					;If on, jump to that subroutine
 	
 Breath
-			LDR R0, =DutyCycle_30		;R0 = # bus cycles for 0.15 seconds
+			LDR R0, =DutyCycle_30b		;R0 = # bus cycles for 0.15 seconds
 			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
 			LDR R2, [R1]				;R2 = Port E data
 			ORR R2, #0x04				;Turn PE2 on
@@ -369,13 +374,76 @@ Breath
 Breath30_ON	SUBS R0, R0, #0x01			;Subtract 1
 			BNE Breath30_ON				;If not 0, repeat
 
-			LDR R0, =DutyCycle_70		;R0 = # bus cycles for 0.35 seconds
+			LDR R0, =DutyCycle_70b		;R0 = # bus cycles for 0.35 seconds
 			BIC R2, #0x04				;Turn PE2 off
 			STR R2, [R1]				;Store into mem
 						
 						;Bottom reisstor prevesnts floating values 
 Breath30_OFF	SUBS R0, R0, #0x01			;Subtract 1
 			BNE Breath30_OFF				;If not 0, repeat
+			
+			LDR R0, =DutyCycle_50b		;R0 = # bus cycles for 0.25 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Breath50_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop50_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_50b		;R0 = # bus cycles for 0.25 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Breath50_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop50_OFF
+			
+			LDR R0, =DutyCycle_70b		;R0 = # bus cycles for 0.35 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Breath70_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop70_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_30b		;R0 = # bus cycles for 0.15 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Breath70_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop70_OFF
       
+			LDR R0, =DutyCycle_90b		;R0 = # bus cycles for 0.15 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Breath90_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop90_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_10b		;R0 = # bus cycles for 0.35 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Breath90_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop90_OFF
+			
+			LDR R0, =DutyCycle_10b		;R0 = # bus cycles for 0.05 seconds
+			LDR R1, =GPIO_PORTE_DATA_R	;R1 = Port E data address
+			LDR R2, [R1]				;R2 = Port E data
+			ORR R2, #0x04				;Turn PE2 on
+			STR R2, [R1]				;Store back into mem
+			
+Breath10_ON	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop10_ON				;If not 0, repeat
+
+			LDR R0, =DutyCycle_90b		;R0 = # bus cycles for 0.45 seconds
+			BIC R2, #0x04				;Turn PE2 off
+			STR R2, [R1]				;Store into mem
+			
+Breath10_OFF	SUBS R0, R0, #0x01			;Subtract 1
+			BNE Loop10_OFF				;If not 0, repeat
      ALIGN      ; make sure the end of this section is aligned
      END        ; end of file
