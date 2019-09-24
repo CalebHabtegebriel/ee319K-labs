@@ -48,6 +48,165 @@ DutyCycle_70 EQU 0x006ACFC0			;7 million bus cycles (350 milliseconds)
 DutyCycle_10 EQU 0x000F4240			;1 million bus cycles (50 milliseconds)
 DutyCycle_90 EQU 0x00895440			;9 million bus cycles (450 milliseconds)
 	
+Counter_Variable EQU 0x00000001				;Declare counter variable
+
+       IMPORT  TExaS_Init
+       THUMB
+       AREA    DATA, ALIGN=2
+;global variables go here
+
+
+       AREA    |.text|, CODE, READONLY, ALIGN=2
+       THUMB
+       EXPORT  Start
+Start
+ ; TExaS_Init sets bus clock at 80 MHz
+     BL  TExaS_Init ; voltmeter, scope on PD3
+	 
+ ; Initialization goes here
+	LDR R0, =SYSCTL_RCGCGPIO_R	;R0 = clock address 
+	LDRB R1, [R0]				;R1 = clock data
+	ORR R1, #0x10				;Turn on Port E clock
+	STRB R1, [R0];				;Store back into mem
+	NOP							;Time Delay
+	NOP
+	
+	LDR R0, =GPIO_PORTF_LOCK_R	;R0 = Lock location
+	LDR R1, =GPIO_LOCK_KEY		;R1 = Key
+	STRB R1, [R0]				;Unlock dis boi	
+	
+	LDR R0, =GPIO_PORTE_DEN_R	;R0 = Port E pin enable address
+	LDRB R1, [R0]				;R1 = pin enable data
+	ORR R1, #0X03				;Enable pins 0 and 1
+	STR R1, [R0]
+	LDR R0, =GPIO_PORTF_DEN_R	;R0 = Port F pin enable address	
+	LDRB R1, [R0]				;R1 = pin enable data
+	ORR R1, #0X10				;Enable pin 4
+	STR R1, [R0]
+	
+	LDR	R0, =GPIO_PORTE_DIR_R	;R0 = Port E direction address
+	LDRB R1, [R0]				;R1 = direction data
+	ORR R1, #0X04				;Pin 2 is output
+	AND R1, #0XFB				;Pins 0&1&3-7 are inputs	DOUBLE CHECK THIS (overlap with ORR and AND)
+	STRB R1, R0;				;Store into mem
+	LDR R0, =GPIO_PORTF_DIR_R	;R0 = Port F direction address
+	LDRB R1, [R0]				;R1 = direction data
+	ORR R1, #0X10				;Pin 4 is output
+	AND R1, #0XEF;				;Pins 0-3 & 5-7 are inputs
+	STRB R1, [R0]				;store back into mem
+	
+	LDR R0, =GPIO_PORTE_AFSEL_R;
+	LDRB R1, [R0];
+	ORR R1, #0X01;
+	STRB R1, [R0];
+	LDR R0, =GPIO_PORTF_AFSEL_R;
+	LDRB R1, [R0];
+	ORR R1, #0X01;
+	STRB R1, [R0];
+
+
+	LDR R0, =GPIO_PORTF_CR_R;
+	LDRB R1, [R0];
+	ORR R1, #0X10;
+	STRB R1, [R0];
+	LDR R0, =GPIO_PORTF_PUR_R;
+	LDRB R1, [R0];
+	ORR R1, #0X10;
+	STRB R1, [R0];
+	
+
+
+
+
+     CPSIE  I    ; TExaS voltmeter, scope runs on interrupts
+loop  
+; main engine goes here
+
+			
+			LDR R4, =Counter_Variable 			;Loading counter value on R4 (R4 strictly for counter)
+Repeat_Process	
+			LDR R0, =GPIO_PORTE_DATA_R	;R0 = Port E data address
+			LDR R1, [R0]				;R1 = Port E data
+			LSR R1, #1					;Put button data into LSB
+			AND R1, R1, #1				;Check to see if pressed (1=on, 0=off)
+			BNE Check_Counter			;If 1, check counter subroutine, if not, check second button below
+			
+			LDR R0, =GPIO_PORTF_DATA_R	;R0 = Port F address
+			LDR R1, [R0]				;R1 = Port F data
+			LSR R1, #4					;Put button data into LSB
+			AND R1, R1, #1				;Check to see if pressed (1=on, 0=off)
+			BNE Repeat_Process			;If not on, loop
+			B Breath					;If on, go to breath subroutine
+
+Check_Counter		
+			CMP R4, #0  				;checking if counter has been used (if it's first time then it would be 0)
+			BEQ duty30					;it it's first time go to duty 30
+			CMP R4, #1  
+			BEQ duty50
+			CMP R4, #2 
+			BEQ duty70
+			CMP R4, #3 
+			BEQ duty70
+			CMP R4, #4 
+			BEQ duty90
+			CMP R4, #5
+			AND R4, R4, #0				;If counter = 5, reset counter
+			BEQ duty10
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;SUBROUTINES HERE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; LD Delay variable(in cycles) = (duty-cycle in milliseconds)/[(4 bus cycles)*(12.5 nanoseconds per bus cycle)]
+
+;****************** main.s *************** 
+; Program written by: ***Caleb Habtegebriel and Ennis**update this***
+; Date Created: 2/4/2017
+; Last Modified: 9/2/2019
+; Brief description of the program
+;   The LED toggles at 2 Hz and a varying duty-cycle
+; Hardware connections (External: One button and one LED)
+;  PE1 is Button input  (1 means pressed, 0 means not pressed)
+;  PE2 is LED output (1 activates external LED on protoboard)
+;  PF4 is builtin button SW1 on Launchpad (Internal) 
+;        Negative Logic (0 means pressed, 1 means not pressed)
+; Overall functionality of this system is to operate like this
+;   1) Make PE2 an output and make PE1 and PF4 inputs.
+;   2) The system starts with the the LED toggling at 2Hz,
+;      which is 2 times per second with a duty-cycle of 30%.
+;      Therefore, the LED is ON for 150ms and off for 350 ms.
+;   3) When the button (PE1) is pressed-and-released increase
+;      the duty cycle by 20% (modulo 100%). Therefore for each
+;      press-and-release the duty cycle changes from 30% to 70% to 70%
+;      to 90% to 10% to 30% so on
+;   4) Implement a "breathing LED" when SW1 (PF4) on the Launchpad is pressed:
+;      a) Be creative and play around with what "breathing" means.
+;         An example of "breathing" is most computers power LED in sleep mode
+;         (e.g., https://www.youtube.com/watch?v=ZT6siXyIjvQ).
+;      b) When (PF4) is released while in breathing mode, resume blinking at 2Hz.
+;         The duty cycle can either match the most recent duty-
+;         cycle or reset to 30%.
+;      TIP: debugging the breathing LED algorithm using the real board.
+; PortE device registers
+GPIO_PORTE_DATA_R  EQU 0x400243FC
+GPIO_PORTE_DIR_R   EQU 0x40024400
+GPIO_PORTE_AFSEL_R EQU 0x40024420
+GPIO_PORTE_DEN_R   EQU 0x4002451C
+; PortF device registers
+GPIO_PORTF_DATA_R  EQU 0x400253FC
+GPIO_PORTF_DIR_R   EQU 0x40025400
+GPIO_PORTF_AFSEL_R EQU 0x40025420
+GPIO_PORTF_PUR_R   EQU 0x40025510
+GPIO_PORTF_DEN_R   EQU 0x4002551C
+GPIO_PORTF_LOCK_R  EQU 0x40025520
+GPIO_PORTF_CR_R    EQU 0x40025524
+GPIO_LOCK_KEY      EQU 0x4C4F434B  ; Unlocks the GPIO_CR register
+SYSCTL_RCGCGPIO_R  EQU 0x400FE608
+
+DutyCycle_50 EQU 0x004C4B40			;5 million bus cycles (250 milliseconds)
+DutyCycle_30 EQU 0x002DC6C0			;3 million bus cycles (150 milliseconds)
+DutyCycle_70 EQU 0x006ACFC0			;7 million bus cycles (350 milliseconds)
+DutyCycle_10 EQU 0x000F4240			;1 million bus cycles (50 milliseconds)
+DutyCycle_90 EQU 0x00895440			;9 million bus cycles (450 milliseconds)
+	
 Counter_Variable EQU 0x00000000				;Declare counter variable
 
        IMPORT  TExaS_Init
@@ -77,41 +236,41 @@ Start
 	
 	LDR R0, =GPIO_PORTE_DEN_R	;R0 = Port E pin enable address
 	LDRB R1, [R0]				;R1 = pin enable data
-	ORR R1, 0X03				;Enable pins 0 and 1
+	ORR R1, #0X03				;Enable pins 0 and 1
 	STR R1, [R0]
 	LDR R0, =GPIO_PORTF_DEN_R	;R0 = Port F pin enable address	
 	LDRB R1, [R0]				;R1 = pin enable data
-	ORR R1, 0X10				;Enable pin 4
+	ORR R1, #0X10				;Enable pin 4
 	STR R1, [R0]
 	
 	LDR	R0, =GPIO_PORTE_DIR_R	;R0 = Port E direction address
 	LDRB R1, [R0]				;R1 = direction data
 	ORR R1, #0X04				;Pin 2 is output
 	AND R1, #0XFB				;Pins 0&1&3-7 are inputs	DOUBLE CHECK THIS (overlap with ORR and AND)
-	STRB R1, R0;				;Store into mem
+	STRB R1, [R0];				;Store into mem
 	LDR R0, =GPIO_PORTF_DIR_R	;R0 = Port F direction address
 	LDRB R1, [R0]				;R1 = direction data
-	ORR R1, 0X10				;Pin 4 is output
-	AND R1, 0XEF;				;Pins 0-3 & 5-7 are inputs
+	ORR R1, #0X10				;Pin 4 is output
+	AND R1, #0XEF;				;Pins 0-3 & 5-7 are inputs
 	STRB R1, [R0]				;store back into mem
 	
 	LDR R0, =GPIO_PORTE_AFSEL_R;
 	LDRB R1, [R0];
-	ORR R1, 0X01;
+	ORR R1, #0X01;
 	STRB R1, [R0];
 	LDR R0, =GPIO_PORTF_AFSEL_R;
 	LDRB R1, [R0];
-	ORR R1, 0X01;
+	ORR R1, #0X01;
 	STRB R1, [R0];
 
 
 	LDR R0, =GPIO_PORTF_CR_R;
 	LDRB R1, [R0];
-	ORR R1, 0X10;
+	ORR R1, #0X10;
 	STRB R1, [R0];
 	LDR R0, =GPIO_PORTF_PUR_R;
 	LDRB R1, [R0];
-	ORR R1, 0X10;
+	ORR R1, #0X10;
 	STRB R1, [R0];
 	
 
@@ -127,12 +286,14 @@ loop
 Repeat_Process	
 			LDR R0, =GPIO_PORTE_DATA_R	;R0 = Port E data address
 			LDR R1, [R0]				;R1 = Port E data
+			BIC R1, #2					;Isolate input bit
 			LSR R1, #1					;Put button data into LSB
 			AND R1, R1, #1				;Check to see if pressed (1=on, 0=off)
 			BNE Check_Counter			;If 1, check counter subroutine, if not, check second button below
 			
 			LDR R0, =GPIO_PORTF_DATA_R	;R0 = Port F address
 			LDR R1, [R0]				;R1 = Port F data
+			BIC R1, #16					;Isolate input bit
 			LSR R1, #4					;Put button data into LSB
 			AND R1, R1, #1				;Check to see if pressed (1=on, 0=off)
 			BNE Repeat_Process			;If not on, loop
