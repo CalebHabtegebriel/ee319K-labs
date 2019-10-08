@@ -42,14 +42,19 @@ GPIO_PORTE_DEN_R   EQU 0x4002451C
 GPIO_PORTF_DATA_R  EQU 0x400253FC
 GPIO_PORTF_DIR_R   EQU 0x40025400
 GPIO_PORTF_DEN_R   EQU 0x4002551C
+GPIO_PORTF_LOCK_R  EQU 0x40025520
+GPIO_LOCK_KEY      EQU 0x4C4F434B  ; Unlocks the GPIO_CR register
+
 ; RAM Area
           AREA    DATA, ALIGN=2
 Index     SPACE 4 ; index into Stepper table 0,1,2,3
 Direction SPACE 4 ; -1 for CCW, 0 for stop 1 for CW
 DataBuffer SPACE 100; 100 element 8 bit array for Port E measurements
 TimeBuffer SPACE 400; 100 element 32 bit array for time measurements
-Datapointer SPACE 2;
-Timepointer SPACE 2;
+DataPointer SPACE 4;
+TimePointer SPACE 4;
+PrevTime SPACE 4
+ArrayCounter SPACE 4
 ;place your debug variables in RAM here
 
 ; ROM Area
@@ -108,7 +113,7 @@ Stepper_Init
     ; activate clock for Port E
       LDR R1, =SYSCTL_RCGCGPIO_R
       LDR R0, [R1]
-      ORR R0, R0, #0x10  ; Clock for E
+      ORR R0, R0, #0x30  ; Clock for E
       STR R0, [R1]
       NOP
       NOP                 ; allow time to finish activating
@@ -129,21 +134,47 @@ Switch_Init
     ; activate clock for Port A
       LDR R1, =SYSCTL_RCGCGPIO_R
       LDR R0, [R1]
-      ORR R0, R0, #0x01  ; Clock for A
+      ORR R0, R0, #0x31  ; Clock for A
       STR R0, [R1]
       NOP
       NOP                 ; allow time to finish activating
-    ; set direction register
-      LDR R1, =GPIO_PORTA_DIR_R
-      LDR R0, [R1]
-      BIC R0, R0, #0x10    ; Input on PA4
-      STR R0, [R1]
-    ; 5) enable digital port
-      LDR R1, =GPIO_PORTA_DEN_R
-      LDR R0, [R1]
-      ORR R0, R0, #0x10    ; enable PA4
-      STR R0, [R1]
-      BX  LR
+			LDR R0, =GPIO_PORTF_LOCK_R	;R0 = Lock location
+			LDR R1, =GPIO_LOCK_KEY		;R1 = Key
+			;LDR R1, [R1]
+			STR R1, [R0]			;Unlock dis boi	
+			
+			LDR R0, =GPIO_PORTF_DEN_R	;R0 = Port F pin enable address	
+			LDRB R1, [R0]				;R1 = pin enable data
+			ORR R1, #0X0E				;Enable pin 4
+			STR R1, [R0]
+			
+			LDR R0, =GPIO_PORTF_DIR_R	;R0 = Port F direction address
+			LDRB R1, [R0]				;R1 = direction data
+			ORR R1, #0X0E				;Pin 4 is output
+			STRB R1, [R0]				;store back into mem
+			
+			LDR R0, =GPIO_PORTF_DATA_R
+			LDR R1, [R0]
+			BIC R1, #0x0E		;Turn off all LEDs
+			STR R1, [R0]
+			
+			LDR R0, =GPIO_PORTE_DEN_R	;R0 = Port F pin enable address	
+			LDR R1, [R0]				;R1 = pin enable data
+			ORR R1, #0X07				;Enable pin 4
+			STR R1, [R0]
+			LDR R0, =GPIO_PORTE_DIR_R	;R0 = Port F pin enable address	
+			LDR R1, [R0]				;R1 = pin enable data
+			ORR R1, #0X07				;Enable pin 4
+			STR R1, [R0]
+			
+			LDR R0, =GPIO_PORTA_DEN_R	;R0 = Port F pin enable address	
+			LDRB R1, [R0]				;R1 = pin enable data
+			ORR R1, #0X010				;Enable pin 4
+			STR R1, [R0]
+			LDR R0, =GPIO_PORTA_DIR_R	;R0 = Port F pin enable address	
+			LDR R1, [R0]				;R1 = pin enable data
+			BIC R1, #0X010				;Enable pin 4
+			STR R1, [R0]
 ; Step the motor clockwise
 ; Direction determines the rotational direction
 ; Input: None
@@ -163,47 +194,68 @@ Stepper_Step
       STR  R0,[R1]
       BL   Debug_Capture
       POP {R4,PC}
+	  B SkipBeat
 ; inaccurate and inefficient time delay
 Wait 
       SUBS R0,R0,#1  ; outer loop
       BNE  Wait
       BX   LR
-      
+HeartBeat
+			
+	PUSH {R0-R4,LR}
+			LDR R0, =GPIO_PORTF_DATA_R
+			LDR R1, [R0]
+			EOR R1, #4
+			STR R1, [R0]	
+	POP {R0-R4,LR}
+	BX LR
+SkipBeat
 Debug_Init 
-      PUSH {R0-R4,LR}
-	  ; you write this
-	  LDR R0, =DataBuffer
-	  MOV R2, #100
-AGAIN	  LDR R1, [R0];
-	      ORR R1, 0XFF;
-		  STR R1, [R0];
-		  ADD R0, R0, #1
-	      SUBS R2, R2, #1;
-	      BNE AGAIN
+	PUSH {R0-R4,LR}
+
+			
+			LDR R0, =DataBuffer	;R0 = @ of Data Array
+			LDR R1, [R0]		;R1 = Data Array pointer
+			MOV R2, #0XFF		;R2 = intialized value		
+			MOV R3, #100		;R3 = counter
+
+AGAIN1	  	STRB R2, [R1]		;Store initialized value to Data Array
+			ADD R1, R1, #1		;Increment Data Array pointer
+			SUBS R2, R2, #1;	;Subtract 1 from counter
+			BNE AGAIN1			;If 100 elements not reached, loop back
 		  
-		LDR R0, =TimeBuffer
-		MOV R2, #400;
-AGAIN2	LDR R1, [R0];
-		ORR R1, 0XFFFFFFFF;
-		STR R1, [R0];
-		ADD R0, R0, #4;
-		SUBS R2, R2, #4
-		BNE AGAIN2
+			
+			LDR R0, =TimeBuffer	;R0 = @ of Time Array
+			LDR R1, [R0]		;R1 = Time Array pointer
+			MOV R2, #0XFFFFFFFF	;R2 = intialized value		
+			MOV R3, #100		;R3 = counter
+
+LOOP1	  	STR R2, [R1]		;Store initialized value to Time Array
+			ADD R1, R1, #1		;Increment Time Array pointer
+			SUBS R2, R2, #1;	;Subtract 1 from counter
+			BNE LOOP1			;If 100 elements not reached, loop back
+			
 		B SysTick_Init
 		
-		LDR R0, =DataPointer;
-		LDR R1, [R0];
-		LDR R2, =DataBuffer;
-		MOV R2, #0;
-		ADD R1, R1, R2;
+		LDR R0, =DataPointer	;R0 = @ of Non Volatile Data Array pointer 
+		LDR R1, [R0]			;R1 = Non Volatile Data Array Pointer
+		LDR R2, =DataBuffer		;R2	= @ of Volatile Data Array pointer
+		LDR R3, [R2]			;R3 = Volatile Data Array pointer (currently zero (not really but ya know))
+		MOV R3, R1				;
+		STR R3, [R2]				;Now our pointers are equal
 		
-		LDR R0, =TimePointer;
-		LDR R1, [R0];
-		LDR R2, =TimeBuffer;
-		MOV R2, #0;
-		ADD R1, R1, R2;
+		LDR R0, =TimePointer	;R0 = @ of Non Volatile Time Array pointer 
+		LDR R1, [R0]			;R1 = Non Volatile Time Array Pointer
+		LDR R2, =TimeBuffer		;R2	= @ of Volatile Time Array pointer
+		LDR R3, [R2]			;R3 = Volatile Time Array pointer (currently zero (not really but ya know))
+		MOV R3, R1				;
+		STR R3, [R2]			;Now our pointers are equal
 		
 		LDR R0, =ArrayCounter
+		MOV R1, #0
+		STR R1, [R0]
+		
+		LDR R0, =PrevTime
 		MOV R1, #0
 		STR R1, [R0]
 		
@@ -212,31 +264,46 @@ AGAIN2	LDR R1, [R0];
 Debug_Capture 
       PUSH {R0-R12,LR}				;This used to be push r0-r6 but changed due to safety
 
-			LDR R0, =ArrayCounter	;R0 = address of ArrayCounter
-			LDR R1, [R0]			;R0 = array counter itself
-			CMP R1, #99				;If we have reached the end, branch out
-			BEQ LR
 			
-			LDR R0, GPIO_PORTE_DATA_R 
+			LDR R0, =ArrayCounter	;R0 = address of ArrayCounter
+			LDR R0, [R0]			;R0 = array counter itself
+			CMP R0, #99				;If we have reached the end, branch out
+			BNE SkipExit
+			POP{R0-R12,LR}
+			BX LR
+SkipExit
+			
+			LDR R0, =GPIO_PORTE_DATA_R 
 			LDR R0, [R0]			;R0 =  outputs
 			AND R0, #15				;establish bitmask for 4 output data points
-			LDR R1, GPIO_PORTA_DATA_R
+			LDR R1, =GPIO_PORTA_DATA_R
 			LDR R1, [R1]			;R1 = input
 			AND R0, #0x010			;Bitmask all but my input
 			ORR R0, R0, R1			;R0 = combined bits
 			
-			LDR R1, =DataPointer	;R1 = address of data pointer
-			LDR R1, [R1]			;R1 is the pointer
-			STR R0, [R1]			;Store my combined bits into array
+			LDR R1, =DataPointer	;R1 = address of array pointer
+			LDR R2, [R1]			;R2 is the pointer
+			STRB R0, [R2]			;Store my combined bits into array 
 			
-			LDR R0, =ArrayCounter	;R0 = address of ArrayCounter
-			LDR R1, [R0]			;R1 = array counter itself
-			BEQ SkipFirstTime		;If this is the first time, skip subtraction steps
-			LDR R2, 													;How to subtract 2 32 bit numbers when registers dont hold 32 bit info because of flags???
-
-			ADD R1, #1				;Increment counter
+			LDR R0, =NVIC_ST_CURRENT_R	;R0 = @ of the current time
+			LDR R0, [R0]			;R0 = current time
+			LDR R3, =PrevTime 		;R3 = @ of previous time
+			LDR R4, [R3]			;R4 = previous time
+			SUB R5, R0, R4			;R5 = time elapsed
+			LDR R6, =TimePointer	;R6 = @ of time array pointer
+			LDR R7, [R6]			;R7 = time array pointer
+			STR R5, [R7]			;Store time elapsed into array
+			ADD R7, #1				;Increment time array pointer
+			STR R7, [R6]			;Store incremented time array pointer into TimePointer
+			
+			LDR R0, =ArrayCounter
+			LDR R1, [R0]
+			ADD R1, #1				;Increment Array Counter
+			STR R1, [R0]
+			
+			B HeartBeat
       POP  {R0-R12,PC}
-      
+      BX LR
 ; edit the following only if you need to move pins from PA4, PE3-0      
 ; logic analyzer on the real board
 PA4  equ  0x40004040   ; bit-specific addressing
