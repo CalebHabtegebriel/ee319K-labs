@@ -175,12 +175,13 @@ Switch_Init
 			LDR R1, [R0]				;R1 = pin enable data
 			BIC R1, #0X010				;Enable pin 4
 			STR R1, [R0]
+			BX  LR
 ; Step the motor clockwise
 ; Direction determines the rotational direction
 ; Input: None
 ; Output: None
 Stepper_Step
-      PUSH {R4,LR}
+      PUSH {R0-R4,LR}
       LDR  R1,=Index
       LDR  R2,[R1]     ; old Index
       LDR  R3,=Direction
@@ -193,8 +194,8 @@ Stepper_Step
       LDR  R1,=GPIO_PORTE_DATA_R ; change PE3-PE0
       STR  R0,[R1]
       BL   Debug_Capture
-      POP {R4,PC}
-	  B SkipBeat
+      POP {R0-R4,LR}
+	  BX LR		;Skip HeartBeat since it is there because of range
 ; inaccurate and inefficient time delay
 Wait 
       SUBS R0,R0,#1  ; outer loop
@@ -231,8 +232,8 @@ AGAIN1	  	STRB R2, [R1]		;Store initialized value to Data Array
 			MOV R3, #100		;R3 = counter
 
 LOOP1	  	STR R2, [R1]		;Store initialized value to Time Array
-			ADD R1, R1, #1		;Increment Time Array pointer
-			SUBS R2, R2, #1;	;Subtract 1 from counter
+			ADD R1, R1, #4		;Increment Time Array pointer
+			SUB R3, R3, #1;	;Subtract 1 from counter
 			BNE LOOP1			;If 100 elements not reached, loop back
 			
 		B SysTick_Init
@@ -302,7 +303,7 @@ SkipExit
 			STR R1, [R0]
 			
 			B HeartBeat
-      POP  {R0-R12,PC}
+      POP  {R0-R12,LR}
       BX LR
 ; edit the following only if you need to move pins from PA4, PE3-0      
 ; logic analyzer on the real board
