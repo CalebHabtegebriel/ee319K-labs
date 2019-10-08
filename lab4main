@@ -160,11 +160,11 @@ Switch_Init
 			
 			LDR R0, =GPIO_PORTE_DEN_R	;R0 = Port F pin enable address	
 			LDR R1, [R0]				;R1 = pin enable data
-			ORR R1, #0X07				;Enable pin 4
+			ORR R1, #0X0F				;Enable pin 4
 			STR R1, [R0]
 			LDR R0, =GPIO_PORTE_DIR_R	;R0 = Port F pin enable address	
 			LDR R1, [R0]				;R1 = pin enable data
-			ORR R1, #0X07				;Enable pin 4
+			ORR R1, #0X0F				;Enable pin 4
 			STR R1, [R0]
 			
 			LDR R0, =GPIO_PORTA_DEN_R	;R0 = Port F pin enable address	
@@ -181,7 +181,7 @@ Switch_Init
 ; Input: None
 ; Output: None
 Stepper_Step
-      PUSH {R0-R4,LR}
+      PUSH {R0-R6,LR}
       LDR  R1,=Index
       LDR  R2,[R1]     ; old Index
       LDR  R3,=Direction
@@ -194,7 +194,7 @@ Stepper_Step
       LDR  R1,=GPIO_PORTE_DATA_R ; change PE3-PE0
       STR  R0,[R1]
       BL   Debug_Capture
-      POP {R0-R4,LR}
+      POP {R0-R6,PC}
 	  BX LR		;Skip HeartBeat since it is there because of range
 ; inaccurate and inefficient time delay
 Wait 
@@ -212,7 +212,7 @@ HeartBeat
 	BX LR
 SkipBeat
 Debug_Init 
-	PUSH {R0-R4,LR}
+	PUSH {R0-R6,LR}
 
 			
 			LDR R0, =DataBuffer	;R0 = @ of Data Array
@@ -263,15 +263,15 @@ LOOP1	  	STR R2, [R1]		;Store initialized value to Time Array
       POP {R0-R4,PC}
 ;Debug capture      
 Debug_Capture 
-      PUSH {R0-R12,LR}				;This used to be push r0-r6 but changed due to safety
+      PUSH {R0-R6,LR}				;This used to be push r0-r6 but changed due to safety
 
 			
 			LDR R0, =ArrayCounter	;R0 = address of ArrayCounter
 			LDR R0, [R0]			;R0 = array counter itself
 			CMP R0, #99				;If we have reached the end, branch out
 			BNE SkipExit
-			POP{R0-R12,LR}
-			BX LR
+			POP  {R0-R6,PC}
+			;BX LR
 SkipExit
 			
 			LDR R0, =GPIO_PORTE_DATA_R 
@@ -303,8 +303,8 @@ SkipExit
 			STR R1, [R0]
 			
 			B HeartBeat
-      POP  {R0-R12,LR}
-      BX LR
+      POP  {R0-R6,PC}
+     ; BX LR
 ; edit the following only if you need to move pins from PA4, PE3-0      
 ; logic analyzer on the real board
 PA4  equ  0x40004040   ; bit-specific addressing
