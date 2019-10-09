@@ -316,6 +316,6 @@ SendDataToLogicAnalyzer
      STR  R0,[R1] ; send data at 10 kHz
      BX   LR
 
-
+;
      ALIGN    ; make sure the end of this section is aligned
      END      ; end of file
