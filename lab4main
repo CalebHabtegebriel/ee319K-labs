@@ -210,47 +210,43 @@ HeartBeat
 			STR R1, [R0]	
 	POP {R0-R4,LR}
 	BX LR
-SkipBeat
+;SkipBeat
 Debug_Init 
 	PUSH {R0-R6,LR}
 
 			
 			LDR R0, =DataBuffer	;R0 = @ of Data Array
-			LDR R1, [R0]		;R1 = Data Array pointer
+			MOV R1, R0
 			MOV R2, #0XFF		;R2 = intialized value		
 			MOV R3, #100		;R3 = counter
 
 AGAIN1	  	STRB R2, [R1]		;Store initialized value to Data Array
 			ADD R1, R1, #1		;Increment Data Array pointer
-			SUBS R2, R2, #1;	;Subtract 1 from counter
+			SUBS R3, R3, #1;	;Subtract 1 from counter
+			CMP R3, #0
 			BNE AGAIN1			;If 100 elements not reached, loop back
 		  
 			
-			LDR R0, =TimeBuffer	;R0 = @ of Time Array
-			LDR R1, [R0]		;R1 = Time Array pointer
-			MOV R2, #0XFFFFFFFF	;R2 = intialized value		
+			LDR R0, =TimeBuffer	;R0 = @ of Data Array
+			MOV R1, R0
+			MOV R2, #0XFFFFFFFF		;R2 = intialized value		
 			MOV R3, #100		;R3 = counter
 
-LOOP1	  	STR R2, [R1]		;Store initialized value to Time Array
-			ADD R1, R1, #4		;Increment Time Array pointer
-			SUB R3, R3, #1;	;Subtract 1 from counter
-			BNE LOOP1			;If 100 elements not reached, loop back
+AGAIN2	  	STR R2, [R1]		;Store initialized value to Data Array
+			ADD R1, R1, #4		;Increment Data Array pointer
+			SUBS R3, R3, #1;	;Subtract 1 from counter
+			CMP R3, #0
+			BNE AGAIN2			;If 100 elements not reached, loop back
 			
-		B SysTick_Init
+		BL SysTick_Init
 		
 		LDR R0, =DataPointer	;R0 = @ of Non Volatile Data Array pointer 
-		LDR R1, [R0]			;R1 = Non Volatile Data Array Pointer
-		LDR R2, =DataBuffer		;R2	= @ of Volatile Data Array pointer
-		LDR R3, [R2]			;R3 = Volatile Data Array pointer (currently zero (not really but ya know))
-		MOV R3, R1				;
-		STR R3, [R2]				;Now our pointers are equal
+		LDR R1, =DataBuffer		;R2	= @ of Volatile Data Array pointer
+		STR R1, [R0]				;Now our pointers are equal
 		
-		LDR R0, =TimePointer	;R0 = @ of Non Volatile Time Array pointer 
-		LDR R1, [R0]			;R1 = Non Volatile Time Array Pointer
-		LDR R2, =TimeBuffer		;R2	= @ of Volatile Time Array pointer
-		LDR R3, [R2]			;R3 = Volatile Time Array pointer (currently zero (not really but ya know))
-		MOV R3, R1				;
-		STR R3, [R2]			;Now our pointers are equal
+		LDR R0, =TimePointer	;R0 = @ of Non Volatile Data Array pointer 
+		LDR R1, =TimeBuffer		;R2	= @ of Volatile Data Array pointer
+		STR R1, [R0]				;Now our pointers are equal
 		
 		LDR R0, =ArrayCounter
 		MOV R1, #0
@@ -260,18 +256,19 @@ LOOP1	  	STR R2, [R1]		;Store initialized value to Time Array
 		MOV R1, #0
 		STR R1, [R0]
 		
-      POP {R0-R4,PC}
+      POP {R0-R6,PC}
+	;  BX LR
 ;Debug capture      
 Debug_Capture 
       PUSH {R0-R6,LR}				;This used to be push r0-r6 but changed due to safety
 
 			
-			LDR R0, =ArrayCounter	;R0 = address of ArrayCounter
-			LDR R0, [R0]			;R0 = array counter itself
-			CMP R0, #99				;If we have reached the end, branch out
-			BNE SkipExit
+			LDR R0, =DataPointer	;R0 points to element of array
+			LDR R1, [R0]			;R1 = element
+			MOV R2, #0xFF			
+			CMP R1, R2				
+			BNE SkipExit			;If element is still initialized, skip the exit branch
 			POP  {R0-R6,PC}
-			;BX LR
 SkipExit
 			
 			LDR R0, =GPIO_PORTE_DATA_R 
@@ -279,28 +276,26 @@ SkipExit
 			AND R0, #15				;establish bitmask for 4 output data points
 			LDR R1, =GPIO_PORTA_DATA_R
 			LDR R1, [R1]			;R1 = input
-			AND R0, #0x010			;Bitmask all but my input
+			AND R1, #0x010			;Bitmask all but my input
 			ORR R0, R0, R1			;R0 = combined bits
 			
-			LDR R1, =DataPointer	;R1 = address of array pointer
-			LDR R2, [R1]			;R2 is the pointer
+			LDR R1, =DataPointer	;R1 points to array address
+			LDR R2, [R1]			;R2 points to array
 			STRB R0, [R2]			;Store my combined bits into array 
+			ADD R2, #1				;Increment array pointer
+			STR R2, [R1]			;Store that into mem
 			
 			LDR R0, =NVIC_ST_CURRENT_R	;R0 = @ of the current time
 			LDR R0, [R0]			;R0 = current time
 			LDR R3, =PrevTime 		;R3 = @ of previous time
 			LDR R4, [R3]			;R4 = previous time
-			SUB R5, R0, R4			;R5 = time elapsed
-			LDR R6, =TimePointer	;R6 = @ of time array pointer
-			LDR R7, [R6]			;R7 = time array pointer
-			STR R5, [R7]			;Store time elapsed into array
-			ADD R7, #1				;Increment time array pointer
-			STR R7, [R6]			;Store incremented time array pointer into TimePointer
+			SUB R5, R0, R4			;R5 = current time - previous time			
 			
-			LDR R0, =ArrayCounter
-			LDR R1, [R0]
-			ADD R1, #1				;Increment Array Counter
-			STR R1, [R0]
+			LDR R1, =TimePointer	;R1 points to array address
+			LDR R2, [R1]			;R2 points to array
+			STR R5, [R2]			;Store my combined bits into array 
+			ADD R2, #4				;Increment array pointer
+			STR R2, [R1]			;Store that into mem
 			
 			B HeartBeat
       POP  {R0-R6,PC}
