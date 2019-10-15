@@ -23,26 +23,26 @@ void EnableInterrupts(void);
 // logic analyzer on the real board
 #define PA4                    (*((volatile unsigned long *)0x40004040))
 #define PE50                    (*((volatile unsigned long *)0x400240FC))
-#define SYSCTL_RCGCGPIO_R       (*((volatile uint32_t *)0x400FE608))
-#define NVIC_ST_CURRENT_R       (*((volatile uint32_t *)0xE000E018))
+//#define SYSCTL_RCGCGPIO_R       (*((volatile uint32_t *)0x400FE608))
+//#define NVIC_ST_CURRENT_R       (*((volatile uint32_t *)0xE000E018))
 
-#define GPIO_PORTA_DATA_R       (*((volatile uint32_t *)0x400043FC))
-#define GPIO_PORTA_DIR_R        (*((volatile uint32_t *)0x40004400))
-#define GPIO_PORTA_DEN_R        (*((volatile uint32_t *)0x4000451C))
+//#define GPIO_PORTA_DATA_R       (*((volatile uint32_t *)0x400043FC))
+//#define GPIO_PORTA_DIR_R        (*((volatile uint32_t *)0x40004400))
+//#define GPIO_PORTA_DEN_R        (*((volatile uint32_t *)0x4000451C))
 
-#define GPIO_PORTB_DATA_R       (*((volatile uint32_t *)0x400053FC))
-#define GPIO_PORTB_DIR_R        (*((volatile uint32_t *)0x40005400))
-#define GPIO_PORTB_DEN_R        (*((volatile uint32_t *)0x4000551C))
+//#define GPIO_PORTB_DATA_R       (*((volatile uint32_t *)0x400053FC))
+//#define GPIO_PORTB_DIR_R        (*((volatile uint32_t *)0x40005400))
+//#define GPIO_PORTB_DEN_R        (*((volatile uint32_t *)0x4000551C))
 
-#define GPIO_PORTE_DATA_R       (*((volatile uint32_t *)0x400243FC))
-#define GPIO_PORTE_DIR_R        (*((volatile uint32_t *)0x40024400))
-#define GPIO_PORTE_DEN_R        (*((volatile uint32_t *)0x4002451C))
+//#define GPIO_PORTE_DATA_R       (*((volatile uint32_t *)0x400243FC))
+//#define GPIO_PORTE_DIR_R        (*((volatile uint32_t *)0x40024400))
+//#define GPIO_PORTE_DEN_R        (*((volatile uint32_t *)0x4002451C))
 
-#define GPIO_PORTF_DATA_R       (*((volatile uint32_t *)0x400253FC))
-#define GPIO_PORTF_DIR_R        (*((volatile uint32_t *)0x40025400))
-#define GPIO_PORTF_DEN_R        (*((volatile uint32_t *)0x4002551C))
-#define GPIO_PORTF_LOCK_R       (*((volatile uint32_t *)0x40025520))
-#define GPIO_LOCK_KEY           (*((volatile uint32_t *)0x4C4F434B))
+//#define GPIO_PORTF_DATA_R       (*((volatile uint32_t *)0x400253FC))
+//#define GPIO_PORTF_DIR_R        (*((volatile uint32_t *)0x40025400))
+//#define GPIO_PORTF_DEN_R        (*((volatile uint32_t *)0x4002551C))
+//#define GPIO_PORTF_LOCK_R       (*((volatile uint32_t *)0x40025520))
+//#define GPIO_LOCK_KEY           (*((volatile uint32_t *)0x4C4F434B))
 
 struct State {
 
@@ -73,7 +73,7 @@ typedef const struct State State_Type;
 #define WiperCC17 17
 #define WiperCC18 18
 #define WiperCC19 19
-#define WiperCC20 20
+//#define WiperCC20 20
 #define CleanC1 21
 #define CleanC2 22
 #define CleanC3 23
@@ -93,57 +93,58 @@ typedef const struct State State_Type;
 #define CleanCC17 37
 #define CleanCC18 38
 #define CleanCC19 39
-#define CleanCC20 40
+//#define CleanCC20 40
 
-State_Type FSM[41] = {
-        {0x01, 0, 5, {Home,	CleanC1,	WiperC1,	CleanC1}},
-        {0x02, 0, 5, {WiperC2,	CleanC2,	WiperC2,	CleanC2}},
-        {0x04, 0, 5, {WiperC3,	CleanC3,	WiperC3,	CleanC3}},
-        {0x08, 0, 5, {WiperC4,	CleanC4,	WiperC4,	CleanC4}},
-        {0x10, 0, 5, {WiperC5,	CleanC5,	WiperC5,	CleanC5}},
-        {0x01, 0, 5, {WiperC6,	CleanC6,	WiperC6,	CleanC6}},
-        {0x02, 0, 5, {WiperC7,	CleanC7,	WiperC7,	CleanC7}},
-        {0x04, 0, 5, {WiperC8,	CleanC8,	WiperC8,	CleanC8}},
-        {0x08, 0, 5, {WiperC9,	CleanC9,	WiperC9,	CleanC9}},
-        {0x10, 0, 5, {WiperC10,	CleanC10,	WiperC10,	CleanC10}},
-        {0x08, 0, 5, {WiperCC11,	CleanCC11,	WiperCC11,	CleanCC11}},
-        {0x04, 0, 5, {WiperCC12,	CleanCC12,	WiperCC12,	CleanCC12}},
-        {0x03, 0, 5, {WiperCC13,	CleanCC13,	WiperCC13,	CleanCC13}},
-        {0x01, 0, 5, {WiperCC14,	CleanCC14,	WiperCC14,	CleanCC14}},
-        {0x10, 0, 5, {WiperCC15,	CleanCC15,	WiperCC15,	CleanCC15}},
-        {0x08, 0, 5, {WiperCC16,	CleanCC16,	WiperCC16,	CleanCC16}},
-        {0x04, 0, 5, {WiperCC17,	CleanCC17,	WiperCC17,	CleanCC17}},
-        {0x02, 0, 5, {WiperCC18,	CleanCC18,	WiperCC18,	CleanCC18}},
-        {0x01, 0, 5, {WiperCC19,	CleanCC19,	WiperCC19,	CleanCC19}},
-        {0x10, 0, 5, {Home,	CleanC1,	WiperC1,	CleanC1}},
-
-        {0x02, 0, 5, {WiperC2,	CleanC2,	WiperC2,	CleanC2}},
+State_Type FSM[39] = {
+	      {0x00, 0, 5, {Home,	CleanC1,	WiperC1,	CleanC1}},
+        {0x01, 0, 5, {WiperC2,	CleanC2,	WiperC2,	CleanC2}},
         {0x02, 0, 5, {WiperC3,	CleanC3,	WiperC3,	CleanC3}},
-        {0x02, 0, 5, {WiperC4,	CleanC4,	WiperC4,	CleanC4}},
-        {0x02, 0, 5, {WiperC5,	CleanC5,	WiperC5,	CleanC5}},
-        {0x02, 0, 5, {WiperC6,	CleanC6,	WiperC6,	CleanC6}},
-        {0x02, 0, 5, {WiperC7,	CleanC7,	WiperC7,	CleanC7}},
+        {0x04, 0, 5, {WiperC4,	CleanC4,	WiperC4,	CleanC4}},
+        {0x08, 0, 5, {WiperC5,	CleanC5,	WiperC5,	CleanC5}},
+        {0x10, 0, 5, {WiperC6,	CleanC6,	WiperC6,	CleanC6}},
+        {0x01, 0, 5, {WiperC7,	CleanC7,	WiperC7,	CleanC7}},
         {0x02, 0, 5, {WiperC8,	CleanC8,	WiperC8,	CleanC8}},
-        {0x02, 0, 5, {WiperC9,	CleanC9,	WiperC9,	CleanC9}},
-        {0x02, 0, 5, {WiperC10,	CleanC10,	WiperC10,	CleanC10}},
-        {0x02, 0, 5, {WiperCC11,	CleanCC11,	WiperCC11,	CleanCC11}},
-        {0x02, 0, 5, {WiperCC12,	CleanCC12,	WiperCC12,	CleanCC12}},
-        {0x02, 0, 5, {WiperCC13,	CleanCC13,	WiperCC13,	CleanCC13}},
+        {0x04, 0, 5, {WiperC9,	CleanC9,	WiperC9,	CleanC9}},
+        {0x08, 0, 5, {WiperC10,	CleanC10,	WiperC10,	CleanC10}},
+        {0x10, 0, 5, {WiperCC11,	CleanCC11,	WiperCC11,	CleanCC11}},
+        {0x08, 0, 5, {WiperCC12,	CleanCC12,	WiperCC12,	CleanCC12}},
+        {0x04, 0, 5, {WiperCC13,	CleanCC13,	WiperCC13,	CleanCC13}},
         {0x02, 0, 5, {WiperCC14,	CleanCC14,	WiperCC14,	CleanCC14}},
-        {0x02, 0, 5, {WiperCC15,	CleanCC15,	WiperCC15,	CleanCC15}},
-        {0x02, 0, 5, {WiperCC16,	CleanCC16,	WiperCC16,	CleanCC16}},
-        {0x02, 0, 5, {WiperCC17,	CleanCC17,	WiperCC17,	CleanCC17}},
-        {0x02, 0, 5, {WiperCC18,	CleanCC18,	WiperCC18,	CleanCC18}},
+        {0x01, 0, 5, {WiperCC15,	CleanCC15,	WiperCC15,	CleanCC15}},
+        {0x10, 0, 5, {WiperCC16,	CleanCC16,	WiperCC16,	CleanCC16}},
+        {0x08, 0, 5, {WiperCC17,	CleanCC17,	WiperCC17,	CleanCC17}},
+        {0x04, 0, 5, {WiperCC18,	CleanCC18,	WiperCC18,	CleanCC18}},
         {0x02, 0, 5, {WiperCC19,	CleanCC19,	WiperCC19,	CleanCC19}},
-        {0x02, 0, 5, {WiperCC20,	CleanCC20,	WiperCC20,	CleanCC20}},
-        {0x02, 0, 5, {Home,	CleanC1,	WiperC1,	CleanC1}}
+				//{0x01, 0, 5, {WiperCC20,	CleanCC20,	WiperCC20,	CleanCC20}},
+        {0x01, 0, 5, {Home,	CleanC1,	WiperC1,	CleanC1}},
+
+        {0x01, 1, 5, {WiperC2,	CleanC2,	WiperC2,	CleanC2}},
+        {0x02, 0, 5, {WiperC3,	CleanC3,	WiperC3,	CleanC3}},
+        {0x04, 1, 5, {WiperC4,	CleanC4,	WiperC4,	CleanC4}},
+        {0x08, 0, 5, {WiperC5,	CleanC5,	WiperC5,	CleanC5}},
+        {0x10, 1, 5, {WiperC6,	CleanC6,	WiperC6,	CleanC6}},
+        {0x01, 0, 5, {WiperC7,	CleanC7,	WiperC7,	CleanC7}},
+        {0x02, 1, 5, {WiperC8,	CleanC8,	WiperC8,	CleanC8}},
+        {0x04, 0, 5, {WiperC9,	CleanC9,	WiperC9,	CleanC9}},
+        {0x08, 1, 5, {WiperC10,	CleanC10,	WiperC10,	CleanC10}},
+        {0x10, 0, 5, {WiperCC11,	CleanCC11,	WiperCC11,	CleanCC11}},
+        {0x08, 1, 5, {WiperCC12,	CleanCC12,	WiperCC12,	CleanCC12}},
+        {0x04, 0, 5, {WiperCC13,	CleanCC13,	WiperCC13,	CleanCC13}},
+        {0x02, 1, 5, {WiperCC14,	CleanCC14,	WiperCC14,	CleanCC14}},
+        {0x01, 0, 5, {WiperCC15,	CleanCC15,	WiperCC15,	CleanCC15}},
+        {0x10, 1, 5, {WiperCC16,	CleanCC16,	WiperCC16,	CleanCC16}},
+        {0x08, 0, 5, {WiperCC17,	CleanCC17,	WiperCC17,	CleanCC17}},
+        {0x04, 1, 5, {WiperCC18,	CleanCC18,	WiperCC18,	CleanCC18}},
+        {0x02, 0, 5, {WiperCC19,	CleanCC19,	WiperCC19,	CleanCC19}},
+        //{0x01, 1, 5, {WiperCC20,	CleanCC20,	WiperCC20,	CleanCC20}},
+        {0x01, 1, 5, {Home,	CleanC1,	WiperC1,	CleanC1}}
         };
 
 uint16_t currentState = Home;
 uint32_t Input = 0;
 void SendDataToLogicAnalyzer(void){
     UART0_DR_R = 0x80|(PA4<<2)|PE50;
-
+}
 
 int main(void){
     TExaS_Init(&SendDataToLogicAnalyzer);    // activate logic analyzer and set system clock to 80 MHz
@@ -151,7 +152,7 @@ int main(void){
 
 // you initialize your system here
 //PA 5-6 are inputs
-    SYSCTL_RCGCGPIO_R |= 0x022;         //Clock in Pins A/B/E/F
+    SYSCTL_RCGCGPIO_R |= 0x033;         //Clock in Pins A/B/E/F
 		SysTick_Wait10ms(10);
 
     GPIO_PORTA_DEN_R |= 0x030;          //Enable PA 4-5
@@ -169,7 +170,7 @@ int main(void){
     GPIO_PORTE_DATA_R &=~ 0x01F;
     GPIO_PORTF_DATA_R &=~ 0x00E;
 
-    GPIO_PORTF_LOCK_R == GPIO_LOCK_KEY;  //Unlock port F                                    Not sure about this!**************************
+    GPIO_PORTF_LOCK_R = GPIO_LOCK_KEY;  //Unlock port F                                    Not sure about this!**************************
     //GP
 	
     EnableInterrupts();
