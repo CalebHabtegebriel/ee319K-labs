@@ -16,7 +16,7 @@
 #include "TExaS.h"
 #include <stdint.h>
 #include "../inc/tm4c123gh6pm.h"
-#include <unistd.h>         //This is for the sleep function (delay)
+//#include <unistd.h>         //This is for the sleep function (delay)
 
 void EnableInterrupts(void);
 // edit the following only if you need to move pins from PA4, PE3-0      
@@ -96,51 +96,51 @@ typedef const struct State State_Type;
 #define CleanCC20 40
 
 State_Type FSM[41] = {
-        {0x01, 0, 50, {Home,	CleanC1,	WiperC1,	CleanC1}},
-        {0x02, 0, 50, {WiperC2,	CleanC2,	WiperC2,	CleanC2}},
-        {0x04, 0, 50, {WiperC3,	CleanC3,	WiperC3,	CleanC3}},
-        {0x08, 0, 50, {WiperC4,	CleanC4,	WiperC4,	CleanC4}},
-        {0x10, 0, 50, {WiperC5,	CleanC5,	WiperC5,	CleanC5}},
-        {0x01, 0, 50, {WiperC6,	CleanC6,	WiperC6,	CleanC6}},
-        {0x02, 0, 50, {WiperC7,	CleanC7,	WiperC7,	CleanC7}},
-        {0x04, 0, 50, {WiperC8,	CleanC8,	WiperC8,	CleanC8}},
-        {0x08, 0, 50, {WiperC9,	CleanC9,	WiperC9,	CleanC9}},
-        {0x10, 0, 50, {WiperC10,	CleanC10,	WiperC10,	CleanC10}},
-        {0x08, 0, 50, {WiperCC11,	CleanCC11,	WiperCC11,	CleanCC11}},
-        {0x04, 0, 50, {WiperCC12,	CleanCC12,	WiperCC12,	CleanCC12}},
-        {0x03, 0, 50, {WiperCC13,	CleanCC13,	WiperCC13,	CleanCC13}},
-        {0x01, 0, 50, {WiperCC14,	CleanCC14,	WiperCC14,	CleanCC14}},
-        {0x10, 0, 50, {WiperCC15,	CleanCC15,	WiperCC15,	CleanCC15}},
-        {0x08, 0, 50, {WiperCC16,	CleanCC16,	WiperCC16,	CleanCC16}},
-        {0x04, 0, 50, {WiperCC17,	CleanCC17,	WiperCC17,	CleanCC17}},
-        {0x02, 0, 50, {WiperCC18,	CleanCC18,	WiperCC18,	CleanCC18}},
-        {0x01, 0, 50, {WiperCC19,	CleanCC19,	WiperCC19,	CleanCC19}},
-        {0x10, 0, 50, {Home,	CleanC1,	WiperC1,	CleanC1}},
+        {0x01, 0, 5, {Home,	CleanC1,	WiperC1,	CleanC1}},
+        {0x02, 0, 5, {WiperC2,	CleanC2,	WiperC2,	CleanC2}},
+        {0x04, 0, 5, {WiperC3,	CleanC3,	WiperC3,	CleanC3}},
+        {0x08, 0, 5, {WiperC4,	CleanC4,	WiperC4,	CleanC4}},
+        {0x10, 0, 5, {WiperC5,	CleanC5,	WiperC5,	CleanC5}},
+        {0x01, 0, 5, {WiperC6,	CleanC6,	WiperC6,	CleanC6}},
+        {0x02, 0, 5, {WiperC7,	CleanC7,	WiperC7,	CleanC7}},
+        {0x04, 0, 5, {WiperC8,	CleanC8,	WiperC8,	CleanC8}},
+        {0x08, 0, 5, {WiperC9,	CleanC9,	WiperC9,	CleanC9}},
+        {0x10, 0, 5, {WiperC10,	CleanC10,	WiperC10,	CleanC10}},
+        {0x08, 0, 5, {WiperCC11,	CleanCC11,	WiperCC11,	CleanCC11}},
+        {0x04, 0, 5, {WiperCC12,	CleanCC12,	WiperCC12,	CleanCC12}},
+        {0x03, 0, 5, {WiperCC13,	CleanCC13,	WiperCC13,	CleanCC13}},
+        {0x01, 0, 5, {WiperCC14,	CleanCC14,	WiperCC14,	CleanCC14}},
+        {0x10, 0, 5, {WiperCC15,	CleanCC15,	WiperCC15,	CleanCC15}},
+        {0x08, 0, 5, {WiperCC16,	CleanCC16,	WiperCC16,	CleanCC16}},
+        {0x04, 0, 5, {WiperCC17,	CleanCC17,	WiperCC17,	CleanCC17}},
+        {0x02, 0, 5, {WiperCC18,	CleanCC18,	WiperCC18,	CleanCC18}},
+        {0x01, 0, 5, {WiperCC19,	CleanCC19,	WiperCC19,	CleanCC19}},
+        {0x10, 0, 5, {Home,	CleanC1,	WiperC1,	CleanC1}},
 
-        {0x02, 0, 50, {WiperC2,	CleanC2,	WiperC2,	CleanC2}},
-        {0x02, 0, 50, {WiperC3,	CleanC3,	WiperC3,	CleanC3}},
-        {0x02, 0, 50, {WiperC4,	CleanC4,	WiperC4,	CleanC4}},
-        {0x02, 0, 50, {WiperC5,	CleanC5,	WiperC5,	CleanC5}},
-        {0x02, 0, 50, {WiperC6,	CleanC6,	WiperC6,	CleanC6}},
-        {0x02, 0, 50, {WiperC7,	CleanC7,	WiperC7,	CleanC7}},
-        {0x02, 0, 50, {WiperC8,	CleanC8,	WiperC8,	CleanC8}},
-        {0x02, 0, 50, {WiperC9,	CleanC9,	WiperC9,	CleanC9}},
-        {0x02, 0, 50, {WiperC10,	CleanC10,	WiperC10,	CleanC10}},
-        {0x02, 0, 50, {WiperCC11,	CleanCC11,	WiperCC11,	CleanCC11}},
-        {0x02, 0, 50, {WiperCC12,	CleanCC12,	WiperCC12,	CleanCC12}},
-        {0x02, 0, 50, {WiperCC13,	CleanCC13,	WiperCC13,	CleanCC13}},
-        {0x02, 0, 50, {WiperCC14,	CleanCC14,	WiperCC14,	CleanCC14}},
-        {0x02, 0, 50, {WiperCC15,	CleanCC15,	WiperCC15,	CleanCC15}},
-        {0x02, 0, 50, {WiperCC16,	CleanCC16,	WiperCC16,	CleanCC16}},
-        {0x02, 0, 50, {WiperCC17,	CleanCC17,	WiperCC17,	CleanCC17}},
-        {0x02, 0, 50, {WiperCC18,	CleanCC18,	WiperCC18,	CleanCC18}},
-        {0x02, 0, 50, {WiperCC19,	CleanCC19,	WiperCC19,	CleanCC19}},
-        {0x02, 0, 50, {WiperCC20,	CleanCC20,	WiperCC20,	CleanCC20}},
-        {0x02, 0, 50, {Home,	CleanC1,	WiperC1,	CleanC1}}
+        {0x02, 0, 5, {WiperC2,	CleanC2,	WiperC2,	CleanC2}},
+        {0x02, 0, 5, {WiperC3,	CleanC3,	WiperC3,	CleanC3}},
+        {0x02, 0, 5, {WiperC4,	CleanC4,	WiperC4,	CleanC4}},
+        {0x02, 0, 5, {WiperC5,	CleanC5,	WiperC5,	CleanC5}},
+        {0x02, 0, 5, {WiperC6,	CleanC6,	WiperC6,	CleanC6}},
+        {0x02, 0, 5, {WiperC7,	CleanC7,	WiperC7,	CleanC7}},
+        {0x02, 0, 5, {WiperC8,	CleanC8,	WiperC8,	CleanC8}},
+        {0x02, 0, 5, {WiperC9,	CleanC9,	WiperC9,	CleanC9}},
+        {0x02, 0, 5, {WiperC10,	CleanC10,	WiperC10,	CleanC10}},
+        {0x02, 0, 5, {WiperCC11,	CleanCC11,	WiperCC11,	CleanCC11}},
+        {0x02, 0, 5, {WiperCC12,	CleanCC12,	WiperCC12,	CleanCC12}},
+        {0x02, 0, 5, {WiperCC13,	CleanCC13,	WiperCC13,	CleanCC13}},
+        {0x02, 0, 5, {WiperCC14,	CleanCC14,	WiperCC14,	CleanCC14}},
+        {0x02, 0, 5, {WiperCC15,	CleanCC15,	WiperCC15,	CleanCC15}},
+        {0x02, 0, 5, {WiperCC16,	CleanCC16,	WiperCC16,	CleanCC16}},
+        {0x02, 0, 5, {WiperCC17,	CleanCC17,	WiperCC17,	CleanCC17}},
+        {0x02, 0, 5, {WiperCC18,	CleanCC18,	WiperCC18,	CleanCC18}},
+        {0x02, 0, 5, {WiperCC19,	CleanCC19,	WiperCC19,	CleanCC19}},
+        {0x02, 0, 5, {WiperCC20,	CleanCC20,	WiperCC20,	CleanCC20}},
+        {0x02, 0, 5, {Home,	CleanC1,	WiperC1,	CleanC1}}
         };
 
-uint16_t n = 0;
-uint32_t input = 0;
+uint16_t currentState = Home;
+uint32_t Input = 0;
 void SendDataToLogicAnalyzer(void){
     UART0_DR_R = 0x80|(PA4<<2)|PE50;
 
@@ -148,10 +148,11 @@ void SendDataToLogicAnalyzer(void){
 int main(void){
     TExaS_Init(&SendDataToLogicAnalyzer);    // activate logic analyzer and set system clock to 80 MHz
     SysTick_Init();
+
 // you initialize your system here
 //PA 5-6 are inputs
     SYSCTL_RCGCGPIO_R |= 0x022;         //Clock in Pins A/B/E/F
-    sleep(0.1);                         //Delay 0.1 seconds
+		SysTick_Wait10ms(10);
 
     GPIO_PORTA_DEN_R |= 0x030;          //Enable PA 4-5
     GPIO_PORTB_DEN_R |= 0x020;          //Enable PB 6
@@ -170,15 +171,17 @@ int main(void){
 
     GPIO_PORTF_LOCK_R == GPIO_LOCK_KEY;  //Unlock port F                                    Not sure about this!**************************
     //GP
+	
     EnableInterrupts();
-		currentState = Home;
-		
+
+	
     while(1) {
-        GPIO_PORTE_DATA_R = (FSM[currentState].LED_Out<< 5) | (FSM[currentState].Pin_Out; // output
+        GPIO_PORTE_DATA_R = (FSM[currentState].LED_Out<< 5) | (FSM[currentState].Pin_Out); // output
         SysTick_Wait10ms(FSM[currentState].delay); // wait
-        Input = (GPIO_PORTA_DATA_R & X30) >> 4; //input
-        currentState = FSM[currentState].Next_State[input];
-    }// next
+        Input = (GPIO_PORTA_DATA_R & 0X30) >> 4; //input
+        currentState = FSM[currentState].Next_State[Input];
+    // next
     }
-    return 0;
 }
+
+
