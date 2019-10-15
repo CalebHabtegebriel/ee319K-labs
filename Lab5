@@ -171,11 +171,13 @@ int main(void){
     GPIO_PORTF_LOCK_R == GPIO_LOCK_KEY;  //Unlock port F                                    Not sure about this!**************************
     //GP
     EnableInterrupts();
+		currentState = Home;
+		
     while(1) {
-        PA50 = FSM[S].Pin_Out; // output
-        SysTick_Wait10ms(FSM[S].delay); // wait
-        Input = PA4; //input
-        S = FSM[S].Next_State[input];
+        GPIO_PORTE_DATA_R = (FSM[currentState].LED_Out<< 5) | (FSM[currentState].Pin_Out; // output
+        SysTick_Wait10ms(FSM[currentState].delay); // wait
+        Input = (GPIO_PORTA_DATA_R & X30) >> 4; //input
+        currentState = FSM[currentState].Next_State[input];
     }// next
     }
     return 0;
