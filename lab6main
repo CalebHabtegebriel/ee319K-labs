@@ -15,7 +15,7 @@
 #include "Sound.h"
 #include "Piano.h"
 #include "TExaS.h"
-#define NoteA 400
+#define NoteA 5797 //Note A4
 #define NoteB 500
 #define NoteC 600
 #define NoteD 700
