@@ -16,9 +16,9 @@
 #include "Piano.h"
 #include "TExaS.h"
 #define NoteA 5797 //Note A4
-#define NoteB 500
-#define NoteC 600
-#define NoteD 700
+#define NoteB 9578 //Note C4
+#define NoteC 7163  //Note F4
+#define NoteD 17123   //Note D3
 #define die 0
 uint16_t Index = 0;
 
