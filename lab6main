@@ -21,6 +21,11 @@
 #define NoteD 17123   //Note D3
 #define die 0
 uint16_t Index = 0;
+int16_t	period2 = 0;
+int16_t mary[25] = {6394, 6394, 5682, 6394, 9579, 5061,
+					6394, 6394, 5682, 6394, 8503, 9579,	
+					6394, 6394, 6394, 7576, 9579, 5061, 5682,		
+					7163, 7163, 7576, 9579, 8503, 9579};
 
 // basic functions defined at end of startup.s
 void DisableInterrupts(void); // Disable interrupts
@@ -35,21 +40,26 @@ int main(void){
     EnableInterrupts();
     while(1){
 
-        uint8_t button = PianoIn();
+        uint8_t button = Piano_In();
         if (button == 1){
-            SoundPlay(NoteA);
+            Sound_Play(NoteA);
         }
         else if (button == 2){
-            SoundPlay(NoteB);
+            Sound_Play(NoteB);
         }
         else if (button == 4){
-            SoundPlay(NoteC);
+            Sound_Play(NoteC);
         }
         else if (button == 8){
-            SoundPlay(NoteD);
+            Sound_Play(NoteD);
         }
-        else{
-            SoundPlay(die);
+        else if(button == 6){ 
+					for(int i = 0; i < 25; i++){
+							period2 = mary[i];
+							Sound_Play(period2);
+					}
+				}else{
+            Sound_Play(die);
         }
     }
 }
