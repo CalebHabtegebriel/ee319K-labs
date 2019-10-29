@@ -4,41 +4,48 @@
 
 		CMP R1, #10		;FOR INPUT<10
 		BHS SKIP10		;IF Input >= 10, skip
-		MOV R2, 0X48	;’0’
-		MOV R3, 0X46	;’.’
-		MOV R4, 0X48	;’0’
-		ADD R1, 0X48	;Inout IN ASCII			
+		MOV R2, 0X30	;’0’
+		MOV R3, 0X2E	;’.’
+		MOV R4, 0X30	;’0’
+		ADD R1, 0X30	;Inout IN ASCII			
 		PUSH [R2, R3, R4, R1]
 		BX LR
 
 SKIP10	CMP R1, #100	;If Input >= 100, skip
-		BHS LOOP100
-		MOV R2, 0X48		;’0’
-		MOV R3, 0X46		;’.’
+		BHS SKIP100
+		MOV R2, 0X30		;’0’
+		MOV R3, 0X2E		;’.’
 LOOP10	SUB R1, #10			
 		ADD R4, #1			;Increment counter for tenths place
 		CMP R1, #0			;Until we get to less than 0, continue looping
 		BGT LOOP10
-		ADD R4, 0X48		;TENTHS PLACE DONE
+		ADD R4, 0X30		;TENTHS PLACE DONE
 		ADD R1, #10			;Add 10 to get back to positive integer to get the right most number
-		ADD R1, 0X48		;HUNDRETHS PLACE DONE
+		ADD R1, 0X30		;HUNDRETHS PLACE DONE
 		PUSH [R2, R3, R4, R1]
 		BX LR
 
+SKIP100	CMP R1, #1000
+		BHS NOTVALID
 LOOP100	SUB R1, #100	;Figure out which of the hundreds it is
 		ADD R2, #1			;Increment first counter for ones place
 		CMP R1, #0
 		BGT LOOP100			;Until we get to less than 0, continue looping
-		ADD R2, 0X48		;ONES PLACE DONE
-		MOV R3, 0X46		;’.’
+		ADD R2, 0X30		;ONES PLACE DONE
+		MOV R3, 0X2E		;’.’
 		ADD R1, #100		;Get back to positive integer 
 
-LOOP1002	SUB R1, #10
+LOOP1002 SUB R1, #10
 		ADD R4, #1			;Increment second counter for tens place
 		CMP R4, #0
 		BGT LOOP1002		;Until we get to less than 0, continue looping
-		ADD R4, 0X48		;Tenths place done
+		ADD R4, 0X30		;Tenths place done
 		ADD R1, #10			;Get back o positive integer for ones place
-		ADD R1, 0X48		;Add for ascii
+		ADD R1, 0X30		;Add for ascii
 		PUSH [R2, R3, R4, R1]
+		BX LR
+
+NOTVALID MOV R2, 0X2A		;’*’
+		MOV R3, 0X2E		;’.’
+		PUSH [R2, R3, R2, R2]
 		BX LR
