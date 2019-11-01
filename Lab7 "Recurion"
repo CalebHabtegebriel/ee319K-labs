@@ -1,7 +1,11 @@
 ;Input R1
 ;Output is in Stack
 
-
+		MOV R1, R0
+		MOV R2, #0
+		MOV R3, #0
+		MOV R4, #0
+		
 		CMP R1, #10		;FOR INPUT<10
 		BHS SKIP10		;IF Input >= 10, skip
 		MOV R2, 0X30	;’0’
