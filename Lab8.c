@@ -35,6 +35,27 @@ void EnableInterrupts(void);  // Enable interrupts
 #define PF3       (*((volatile uint32_t *)0x40025020))
 // Initialize Port F so PF1, PF2 and PF3 are heartbeats
 void PortF_Init(void){
+ SYSCTL_RCGCGPIO_R |= 0x20;
+ int delay = SYSCTL_RCGCGPIO_R;
+ GPIO_PORTF_DIR_R |= 0xE;
+ GPIO_PORTF_DEN_R |= 0xe;
+}
+
+void SysTick_Init(uint32_t period) {
+	NVIC_ST_CTRL_R = 0;
+	NVIC_ST_RELOAD_R = period - 1;
+	NVIC_ST_CURRENT_R = 0;
+	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R & 0x00FFFFFF) | 0X20000000;
+	NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE + NVIC_ST_CTRL_INTEN + NVIC_ST_CTRL_CLK_SRC;	
+}
+int data, ready;
+void SysTick_Handler(void) {
+	GPIO_PORTF_DATA_R ^= 0x02;
+	GPIO_PORTF_DATA_R ^= 0x02;
+	data = ADC_In();
+	ready = 1;
+	GPIO_PORTF_DATA_R ^= 0x02;
+
 
 }
 uint32_t Data;        // 12-bit ADC
@@ -68,7 +89,6 @@ int main2(void){
 uint32_t Convert(uint32_t input){
   return 0; // replace this line with your Lab 8 solution
 }	
-ADC0_RIS_R = 
 int main3(void){ 
   TExaS_Init();         // Bus clock is 80 MHz 
   ST7735_InitR(INITR_REDTAB); 
@@ -93,7 +113,9 @@ int realmain(void){
   // your Lab 8
   EnableInterrupts();
   while(1){
+		if(status>0){
+			result = Convert(ADCMail);
+			status = -1;
+		}
   }
 }
-
-
