@@ -67,7 +67,8 @@ int main2(void){
 // your function to convert ADC sample to distance (0.01cm)
 uint32_t Convert(uint32_t input){
   return 0; // replace this line with your Lab 8 solution
-}
+}	
+ADC0_RIS_R = 
 int main3(void){ 
   TExaS_Init();         // Bus clock is 80 MHz 
   ST7735_InitR(INITR_REDTAB); 
