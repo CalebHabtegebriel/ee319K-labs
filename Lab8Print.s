@@ -85,7 +85,9 @@ loop
 	BEQ returnOutFix		;We have reached the end
 	MOV R3, #0xa
 	UDIV R2, R0, R3
-	MLS R4, R2, R3, R0 
+	MLS R4, R2, R3, R0  
+	SUB R4, R3, R0
+	MUL R4, R2, R4
 	MOV R0, R2
 	STR R4, [SP, #Zero]
 	STR R1, [SP, #Length]
