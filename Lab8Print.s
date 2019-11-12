@@ -73,18 +73,16 @@ ENDD	ADD SP, #8
 LCD_OutFix
     ; copy/paste Lab 7 solution here
 	MOV R1, #0
-LCD_OutFix_Wrap
+loop
 	PUSH {LR, R4, R1, R0}
 	
-; ******Allocation Phase*******	
-	SUB SP, #8 ; Allocate Zero
+	SUB SP, #8
 
-; *****Access Phase*******
-	MOV R4, #10000
+	MOV R4, #0x2710
 	CMP R0, R4
-	BHS stars
+	BHS wrong
 	CMP R1, #4
-	BEQ returnOutFix
+	BEQ returnOutFix		;We have reached the end
 	MOV R3, #0xa
 	UDIV R2, R0, R3
 	MLS R4, R2, R3, R0 
@@ -92,7 +90,7 @@ LCD_OutFix_Wrap
 	STR R4, [SP, #Zero]
 	STR R1, [SP, #Length]
 	ADD R1, #1
-	BL LCD_OutFix_Wrap
+	BL loop
 	LDR R0, [SP, #Zero]
 	ADD R0, #0x30
 	BL ST7735_OutChar
@@ -102,7 +100,7 @@ LCD_OutFix_Wrap
 	MOV R0, #0x2E
 	BL ST7735_OutChar
 	B returnOutFix
-stars
+wrong
 	MOV R0, #0x2A
 	BL ST7735_OutChar
 	MOV R0, #0x2E
