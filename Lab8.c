@@ -24,7 +24,7 @@
 
 //*****the first three main programs are for debugging *****
 // main1 tests just the ADC and slide pot, use debugger to see data
-// main2 adds the LCD to the ADC and slide pot, ADC data is on ST7735
+// main2 adds the ou to the ADC and slide pot, ADC data is on ST7735
 // main3 adds your convert function, position data is no ST7735
 
 void DisableInterrupts(void); // Disable interrupts
@@ -37,8 +37,9 @@ void EnableInterrupts(void);  // Enable interrupts
 void PortF_Init(void){
  SYSCTL_RCGCGPIO_R |= 0x20;
  int delay = SYSCTL_RCGCGPIO_R;
- GPIO_PORTF_DIR_R |= 0xE;
- GPIO_PORTF_DEN_R |= 0xe;
+  GPIO_PORTF_DIR_R |= 0x0E;      								//PF1-3 are outputs
+  GPIO_PORTF_DEN_R |= 0x0E;    								  // enable PF1-3
+GPIO_PORTF_DATA_R &=~ 0x0E;										//Clear data
 }
 
 void SysTick_Init(uint32_t period) {
@@ -87,7 +88,8 @@ int main2(void){
 
 // your function to convert ADC sample to distance (0.01cm)
 uint32_t Convert(uint32_t input){
-  return 0; // replace this line with your Lab 8 solution
+	input = ((56*(input))+27891)/128;
+  return input;
 }	
 int main3(void){ 
   TExaS_Init();         // Bus clock is 80 MHz 
@@ -113,7 +115,7 @@ int realmain(void){
   // your Lab 8
   EnableInterrupts();
   while(1){
-		if(status>0){
+		if(ready>0){
 			result = Convert(ADCMail);
 			status = -1;
 		}
