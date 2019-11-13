@@ -114,10 +114,13 @@ int main3(void){
 }   
 int realmain(void){
 	int result;
-	//Our data is their ADCMail
-  TExaS_Init();
+	ST7735_InitR(INITR_REDTAB); 
+	SysTick_Init(2000000);
+	ADC_Init();
+   	PortF_Init(); 
+	TExaS_Init();
+	EnableInterrupts();
   // your Lab 8
-  EnableInterrupts();
   while(1){
 		if(ready>0){
 			result = data;
