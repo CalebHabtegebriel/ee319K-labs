@@ -96,7 +96,7 @@ writedata
         ; copy/paste Lab 7 solution here
 BUSY3	LDR R1, =SSI0_SR_R		;reading SSIO_SR_R
 		LDR R1, [R1]
-		AND R2, R1, #0X01		;checking bit 1
+		AND R2, R1, #0X02		;checking bit 1
 		CMP R2, #1
 		BNE	BUSY3				;loop
 		LDR R2, =GPIO_PORTA_DATA_R			;setting PA6
