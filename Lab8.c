@@ -56,6 +56,8 @@ void SysTick_Handler(void) {
 	data = ADC_In();
 	ready = 1;
 	GPIO_PORTF_DATA_R ^= 0x02;
+	
+	
 
 
 }
@@ -65,7 +67,7 @@ int main(void){       // single step this program and look at Data
   TExaS_Init();       // Bus clock is 80 MHz 
   ADC_Init();         // turn on ADC, set channel to 5
   while(1){                
-    Data = ADC_In();  // sample 12-bit channel 5
+		Data = ADC_In();  // sample 12-bit channel 5
   }
 }
 
@@ -111,13 +113,21 @@ int main3(void){
   }
 }   
 int realmain(void){
+	int result;
+	//Our data is their ADCMail
   TExaS_Init();
   // your Lab 8
   EnableInterrupts();
   while(1){
 		if(ready>0){
-			result = Convert(ADCMail);
-			status = -1;
+			result = data;
+			result = Convert(result);
+			ready = -1;
+			
+			ST7735_SetCursor(0,0);
+			LCD_OutFix(result);
+			ST7735_OutString("cm");
+			
 		}
   }
 }
