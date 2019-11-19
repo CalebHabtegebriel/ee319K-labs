@@ -18,6 +18,7 @@
 int32_t static PutI; //Index to put new
 int32_t static GetI; // Index of oldest
 int32_t static Fifo[FIFO_SIZE];
+int i; 
 void Fifo_Init(){
 // --UUU-- Complete this
 	PutI = GetI = 0;
@@ -31,11 +32,20 @@ void Fifo_Init(){
 //         failure is when the buffer is full
 uint32_t Fifo_Put(char data){
 // --UUU-- Complete this routine
-	if(((PutI + 1)%FIFO_SIZE) == GetI) {
+	if(PutI - GetI == FIFO_SIZE) {
+		return (0);
+	}
+	Fifo[PutI] = data;
+	if(((PutI % FIFO_SIZE) != 0)|| PutI == 0){
+		PutI++;
+	}else{
+		PutI = 0; 
+	}
+	/*if(((PutI + 1)%FIFO_SIZE) == GetI) {
 			return(0);
 	}
 	Fifo[PutI] = data;
-	PutI = (PutI + 1)%FIFO_SIZE;
+	PutI = (PutI + 1)%FIFO_SIZE;*/
 	return (1);
 }
 
@@ -46,12 +56,24 @@ uint32_t Fifo_Put(char data){
 //         failure is when the buffer is empty
 uint32_t Fifo_Get(char *datapt){ 
 //--UUU-- Complete this routine
+	
 	if(GetI == PutI) {
 		return(0);
 	}
 	*datapt = Fifo[GetI];
-	GetI = (GetI+1)%FIFO_SIZE;
+	for(i = 0; i< FIFO_SIZE; i++){
+		Fifo[i] = Fifo[i+1];
+	}
+	PutI --; 
+	/*if(((GetI % FIFO_SIZE) != 0)|| GetI == 0){
+		GetI++;
+	}else{
+		GetI = 0; 
+	}*/
+
+	/**GetI = (GetI+1)%FIFO_SIZE;*/
 	return(1);
 	}
+
 
 
