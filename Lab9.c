@@ -99,22 +99,69 @@ uint32_t Convert(uint32_t input){
 // final main program for bidirectional communication
 // Sender sends using SysTick Interrupt
 // Receiver receives using RX
+
+void SysTick_Init(uint32_t period){
+	NVIC_ST_CTRL_R = 0;
+	NVIC_ST_RELOAD_R = period -1;
+	NVIC_ST_CURRENT_R = 0;
+	NVIC_SYS_PRI3_R = (NVIC_SYS_PRI3_R & 0x00FFFFFF) | 0x20000000;\
+	NVIC_ST_CTRL_R = 0x0007;
+
+}
+char data1;
+int position;
 int main(void){ 
+	int delay;
   DisableInterrupts(); // complete initialization first
   PLL_Init(Bus80MHz);     // Bus clock is 80 MHz 
   ST7735_InitR(INITR_REDTAB);
   ADC_Init();    // initialize to sample ADC
+//	delay=0x5000;
+//	while(delay){
+//		delay--;
+//	}
   PortF_Init();
+//	 delay=0x5000;
+//	while(delay){
+//		delay--;
+//	}
   UART1_Init();       // initialize UART
+//	 delay=0x5000;
+//	while(delay){
+//		delay--;
+//	}
   ST7735_SetCursor(0,0);
-  LCD_OutFix(0);
-  ST7735_OutString(" cm");
+  //LCD_OutFix(0);
+  ST7735_OutString("0.00 cm");
 //Enable SysTick Interrupt by calling SysTick_Init()
   EnableInterrupts();
   while(1){
     //--UUU--Complete this  - see lab manual
-  }
+		ST7735_SetCursor(0,0);
+		Fifo_Get(&data1);// obtain a value
+		if(data1==0x02){
+//			ST7735_FillScreen(0);
+		ST7735_SetCursor(0,0);
+		Fifo_Get(&data1);
+		ST7735_OutChar(data1);		//dig1
+		Fifo_Get(&data1);
+		ST7735_OutChar(data1);		//"."
+		Fifo_Get(&data1);
+		ST7735_OutChar(data1);		//dig2
+		Fifo_Get(&data1);
+		ST7735_OutChar(data1);		//dig3
+		Fifo_Get(&data1);
+		ST7735_OutChar(data1);	
+		ST7735_OutString("      cm");
+		Fifo_Get(&data1);
+		Fifo_Get(&data1);
+		ST7735_SetCursor(0,1);
+		ST7735_OutString("                 ");
+		Fifo_Init();	
+		}
 }
+}
+
 
 /* SysTick ISR
 */
@@ -147,4 +194,3 @@ void SysTick_Handler(void){ // every 20 ms
 	GPIO_PORTF_DATA_R ^= 0x02; 
 
 	}
-
